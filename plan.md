@@ -15,6 +15,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [x] Set up Supabase CLI for local dev (`supabase init`)
 
 **Verify:**
+
 - `npm run dev` starts without errors
 - Supabase client initializes (console log confirms connection)
 - A shadcn `<Button>` renders with Tailwind styles on the index page
@@ -39,6 +40,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [x] Seed data script for local development
 
 **Verify:**
+
 - `supabase db reset` runs all migrations cleanly
 - Insert test data via SQL: 2 users, each with habits, logs, goals
 - Confirm RLS: user A cannot read user B's data
@@ -51,15 +53,16 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 
 **Goal:** Users can sign up, log in, log out. Sessions persist across refreshes.
 
-- [ ] Auth layout group `(auth)/` with `/login` and `/signup` pages
-- [ ] Email/password sign up via `supabase.auth.signUp()`
-- [ ] Email/password login + magic link option
-- [ ] Next.js middleware: redirect unauthenticated users to `/login`
-- [ ] Middleware: redirect authenticated users away from `/login` to `/today`
-- [ ] Sign out button that clears session
-- [ ] Confirm `profiles` row created automatically on sign up (auth trigger)
+- [x] Auth layout group `(auth)/` with `/login` and `/signup` pages
+- [x] Email/password sign up via `supabase.auth.signUp()`
+- [x] Email/password login + magic link option
+- [x] Next.js middleware: redirect unauthenticated users to `/login`
+- [x] Middleware: redirect authenticated users away from `/login` to `/today`
+- [x] Sign out button that clears session
+- [x] Confirm `profiles` row created automatically on sign up (auth trigger)
 
 **Verify:**
+
 - Sign up with email → confirmation email received (or auto-confirm in local dev)
 - Log in → redirected to `/today`
 - Refresh page → still logged in
@@ -73,13 +76,14 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 
 **Goal:** App has a sidebar, responsive layout, and all page routes (stubbed).
 
-- [ ] Dashboard layout group `(dashboard)/` with shared `layout.tsx`
-- [ ] Sidebar component: nav links for Today, Habits, Categories, Goals, Analytics, Settings
-- [ ] Active state on current route
-- [ ] Mobile-responsive: sidebar collapses to hamburger menu on small screens
-- [ ] Stub pages for all 6 routes (just a heading per page)
+- [x] Dashboard layout group `(dashboard)/` with shared `layout.tsx`
+- [x] Sidebar component: nav links for Today, Habits, Categories, Goals, Analytics, Settings
+- [x] Active state on current route
+- [x] Mobile-responsive: sidebar collapses to hamburger menu on small screens
+- [x] Stub pages for all 6 routes (just a heading per page)
 
 **Verify:**
+
 - Navigate between all 6 pages via sidebar
 - Sidebar highlights correct active link
 - Resize browser to mobile width — sidebar collapses, hamburger works
@@ -99,6 +103,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [ ] Empty state when no categories exist
 
 **Verify:**
+
 - Create 3 categories with different colors/icons
 - Edit a category name — change persists on refresh
 - Delete a category with no habits — succeeds
@@ -120,6 +125,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [ ] Freemium gate: free users see "Upgrade" prompt when at 4 habits
 
 **Verify:**
+
 - Create habits across multiple categories — they appear grouped correctly
 - Edit a habit's category — it moves to the new group
 - Archive a habit — it disappears from the default view
@@ -144,6 +150,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [ ] Custom hook: `useLogs()` — fetch, create, delete for a given date
 
 **Verify:**
+
 - Toggle a boolean habit → ring updates immediately, data persists on refresh
 - Enter a value for a value-type habit → saved correctly
 - Switch to yesterday via date selector → see different completion state
@@ -165,6 +172,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [ ] Custom hook: `useGoals()` — fetch, create, update, delete + progress
 
 **Verify:**
+
 - Create a goal: "Run 50 miles this month" → link to running habit with `value_sum` mode
 - Log runs on the Today page → goal progress bar updates automatically
 - Create a goal with `count` mode → progress increments by 1 per log
@@ -188,6 +196,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [ ] Custom hooks: `useHabitStats()`, `useCategoryStats()`
 
 **Verify:**
+
 - Select a habit with logged data → all charts render with correct values
 - Switch habits → charts update
 - Toggle 30d / 90d / all time → data range changes
@@ -211,6 +220,7 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - [ ] "Upgrade" prompts at each gate point (placeholder — no Stripe)
 
 **Verify:**
+
 - Free user hits every limit — sees upgrade prompt, cannot bypass
 - Manually set `profiles.plan = 'premium'` in DB → all limits removed
 - Settings page shows correct user info
@@ -222,21 +232,31 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 
 **Goal:** Production-ready. Deployed to Vercel at notchhabits.com.
 
-- [ ] Loading skeletons for all data-fetching pages
-- [ ] Error boundaries with user-friendly messages
-- [ ] Empty states for every list (habits, categories, goals, logs)
-- [ ] Mobile responsiveness pass on all pages
-- [ ] Favicon, meta tags, OG image
-- [ ] Environment variables configured on Vercel
+- [x] Loading skeletons for all data-fetching pages
+- [x] Error boundaries with user-friendly messages
+- [x] Empty states for every list (habits, categories, goals, logs)
+- [x] Mobile responsiveness pass on all pages
+- [x] Favicon, meta tags, OG image
+- [ ] Environment variables configured on Vercel (use hosted Supabase project, not local)
+- [x] Remove `SUPABASE_SERVICE_ROLE_KEY` from `.env.local` — only use server-side if needed
+- [x] Set `NEXT_PUBLIC_SITE_URL` to production domain for magic link redirects
+- [x] Add security headers in `next.config.mjs` (X-Frame-Options, CSP, X-Content-Type-Options)
 - [ ] Vercel deployment from GitHub main branch
 - [ ] Smoke test on production: sign up → create category → create habit → log → check analytics → create goal → verify progress
 
 **Verify:**
+
 - App loads at notchhabits.com
 - Full user flow works end-to-end on desktop Chrome
 - Full user flow works on mobile Safari
+- Magic link email points to production URL, not localhost
+- Security headers present in response (check via browser DevTools → Network tab)
 - No console errors in production build
 - Lighthouse score: Performance > 80, Accessibility > 90
+
+## Stage 11 - deploy
+
+- db password XVwL+nx5Rc.JWyc
 
 ---
 
@@ -249,3 +269,4 @@ Each stage is a self-contained, testable unit. Don't start stage N+1 until stage
 - CSV data export
 - Milestones
 - Stripe premium upgrade flow
+- **Auth hardening:** email confirmations, stronger password requirements, secure password change (re-auth), session timeouts (24h/8h idle), refresh token reuse interval reduction, error message audit for user enumeration

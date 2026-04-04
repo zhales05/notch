@@ -12,7 +12,9 @@
 -- User A (free plan)
 insert into auth.users (
   id, instance_id, email, encrypted_password, email_confirmed_at,
-  raw_app_meta_data, raw_user_meta_data, aud, role, created_at, updated_at
+  raw_app_meta_data, raw_user_meta_data, aud, role, created_at, updated_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change_token_current,
+  email_change, phone_change, phone_change_token, reauthentication_token
 ) values (
   'a1111111-1111-1111-1111-111111111111',
   '00000000-0000-0000-0000-000000000000',
@@ -23,7 +25,9 @@ insert into auth.users (
   '{"display_name":"Alice"}',
   'authenticated',
   'authenticated',
-  now(), now()
+  now(), now(),
+  '', '', '', '',
+  '', '', '', ''
 );
 
 insert into auth.identities (
@@ -40,7 +44,9 @@ insert into auth.identities (
 -- User B (premium plan)
 insert into auth.users (
   id, instance_id, email, encrypted_password, email_confirmed_at,
-  raw_app_meta_data, raw_user_meta_data, aud, role, created_at, updated_at
+  raw_app_meta_data, raw_user_meta_data, aud, role, created_at, updated_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change_token_current,
+  email_change, phone_change, phone_change_token, reauthentication_token
 ) values (
   'b2222222-2222-2222-2222-222222222222',
   '00000000-0000-0000-0000-000000000000',
@@ -51,7 +57,9 @@ insert into auth.users (
   '{"display_name":"Bob"}',
   'authenticated',
   'authenticated',
-  now(), now()
+  now(), now(),
+  '', '', '', '',
+  '', '', '', ''
 );
 
 insert into auth.identities (
@@ -77,12 +85,13 @@ insert into public.categories (id, user_id, title, color, icon, sort_order) valu
   ('ca000001-0000-0000-0000-000000000001', 'a1111111-1111-1111-1111-111111111111', 'Health', '#ef4444', 'heart', 0),
   ('ca000001-0000-0000-0000-000000000002', 'a1111111-1111-1111-1111-111111111111', 'Learning', '#3b82f6', 'book', 1);
 
--- Habits (4 = free plan max)
-insert into public.habits (id, user_id, category_id, title, log_type, frequency, unit, color, icon) values
-  ('a0000001-0000-0000-0000-000000000001', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000001', 'Morning Run', 'value', 'daily', 'miles', '#ef4444', 'running'),
-  ('a0000001-0000-0000-0000-000000000002', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000001', 'Drink Water', 'boolean', 'daily', null, '#06b6d4', 'droplet'),
-  ('a0000001-0000-0000-0000-000000000003', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000002', 'Read 30 min', 'boolean', 'daily', null, '#3b82f6', 'book'),
-  ('a0000001-0000-0000-0000-000000000004', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000002', 'Practice Spanish', 'value', 'daily', 'minutes', '#8b5cf6', 'globe');
+-- Habits (mix of frequency types)
+insert into public.habits (id, user_id, category_id, title, log_type, frequency, frequency_config, unit, daily_target, color, icon) values
+  ('a0000001-0000-0000-0000-000000000001', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000001', 'Morning Run', 'value', 'daily', null, 'miles', 3, '#ef4444', 'running'),
+  ('a0000001-0000-0000-0000-000000000002', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000001', 'Drink Water', 'value', 'daily', null, 'oz', 64, '#06b6d4', 'droplet'),
+  ('a0000001-0000-0000-0000-000000000003', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000002', 'Read 30 min', 'boolean', 'specific_days', '{"days": [1, 3, 5]}', null, null, '#3b82f6', 'book'),
+  ('a0000001-0000-0000-0000-000000000004', 'a1111111-1111-1111-1111-111111111111', 'ca000001-0000-0000-0000-000000000002', 'Practice Spanish', 'value', 'x_per_period', '{"times": 3, "period": "week"}', 'minutes', 30, '#8b5cf6', 'globe'),
+  ('a0000001-0000-0000-0000-000000000005', 'a1111111-1111-1111-1111-111111111111', null, 'Arrive at Work', 'time', 'specific_days', '{"days": [1, 2, 3, 4, 5]}', null, 510, '#f59e0b', 'clock');
 
 -- Habit Logs (last 7 days)
 insert into public.habit_logs (user_id, habit_id, logged_at, value) values
@@ -93,14 +102,14 @@ insert into public.habit_logs (user_id, habit_id, logged_at, value) values
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000001', current_date - 2, 3.0),
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000001', current_date - 1, 5.2),
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000001', current_date, 2.8),
-  -- Drink Water (boolean — presence = done)
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 6, null),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 5, null),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 4, null),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 3, null),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 2, null),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 1, null),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date, null),
+  -- Drink Water (value — oz per day, target 64)
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 6, 48),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 5, 64),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 4, 72),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 3, 56),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 2, 64),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date - 1, 80),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000002', current_date, 32),
   -- Read 30 min (boolean, gap on day -4 for streak testing)
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000003', current_date - 6, null),
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000003', current_date - 5, null),
@@ -111,7 +120,13 @@ insert into public.habit_logs (user_id, habit_id, logged_at, value) values
   -- Practice Spanish (value)
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000004', current_date - 5, 15),
   ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000004', current_date - 3, 20),
-  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000004', current_date - 1, 25);
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000004', current_date - 1, 25),
+  -- Arrive at Work (time — minutes since midnight, target 510 = 8:30am)
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000005', current_date - 5, 505),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000005', current_date - 4, 518),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000005', current_date - 3, 498),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000005', current_date - 2, 525),
+  ('a1111111-1111-1111-1111-111111111111', 'a0000001-0000-0000-0000-000000000005', current_date - 1, 510);
 
 -- Goals (some with category, one without)
 insert into public.goals (id, user_id, category_id, title, target_value, unit, start_date, end_date) values
@@ -132,8 +147,10 @@ insert into public.goal_habits (goal_id, habit_id, contribution_mode, weight) va
 insert into public.categories (id, user_id, title, color, icon) values
   ('cb000001-0000-0000-0000-000000000001', 'b2222222-2222-2222-2222-222222222222', 'Fitness', '#10b981', 'dumbbell');
 
-insert into public.habits (id, user_id, category_id, title, log_type, frequency) values
-  ('b0000001-0000-0000-0000-000000000001', 'b2222222-2222-2222-2222-222222222222', 'cb000001-0000-0000-0000-000000000001', 'Push-ups', 'value', 'daily');
+insert into public.habits (id, user_id, category_id, title, log_type, frequency, frequency_config, unit) values
+  ('b0000001-0000-0000-0000-000000000001', 'b2222222-2222-2222-2222-222222222222', 'cb000001-0000-0000-0000-000000000001', 'Push-ups', 'value', 'daily', null, 'reps'),
+  ('b0000001-0000-0000-0000-000000000002', 'b2222222-2222-2222-2222-222222222222', 'cb000001-0000-0000-0000-000000000001', 'Yoga', 'boolean', 'every_n_weeks', '{"interval_weeks": 2, "anchor_date": "2026-03-30"}', null),
+  ('b0000001-0000-0000-0000-000000000003', 'b2222222-2222-2222-2222-222222222222', null, 'Meal Prep', 'boolean', 'x_per_period', '{"times": 2, "period": "month"}', null);
 
 insert into public.habit_logs (user_id, habit_id, logged_at, value) values
   ('b2222222-2222-2222-2222-222222222222', 'b0000001-0000-0000-0000-000000000001', current_date, 50);
