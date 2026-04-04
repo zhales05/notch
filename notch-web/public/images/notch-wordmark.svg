@@ -1,0 +1,12 @@
+<svg width="320" height="80" viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Notch wordmark only -->
+  <text
+    x="0"
+    y="52"
+    font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif"
+    font-size="52"
+    font-weight="500"
+    fill="#111111"
+    letter-spacing="4"
+  >notch</text>
+</svg>

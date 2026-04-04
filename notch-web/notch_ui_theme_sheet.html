@@ -1,0 +1,339 @@
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  .sheet{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;padding:32px 28px;transition:background .2s,color .2s}
+  .sheet.light{background:#FFFFFF;color:#111111}
+  .sheet.dark{background:#111111;color:#FFFFFF}
+
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+  .logo-mark{display:flex;align-items:flex-end;gap:12px}
+  .tally{display:flex;align-items:flex-end;gap:5px}
+  .tally span{display:block;width:4px;border-radius:2px}
+  .wordmark{font-size:22px;font-weight:500;letter-spacing:3px}
+  .toggle-btn{font-size:12px;letter-spacing:1px;border:0.5px solid;border-radius:6px;padding:6px 14px;cursor:pointer;font-family:inherit;background:transparent;transition:background .15s}
+  .sheet.light .toggle-btn{border-color:#33333340;color:#333}
+  .sheet.dark  .toggle-btn{border-color:#ffffff40;color:#ccc}
+
+  .section-label{font-size:10px;letter-spacing:2px;font-weight:500;margin-bottom:16px}
+  .sheet.light .section-label{color:#888}
+  .sheet.dark  .section-label{color:#666}
+  .divider{height:0.5px;margin:28px 0}
+  .sheet.light .divider{background:#11111118}
+  .sheet.dark  .divider{background:#ffffff18}
+
+  /* Colors */
+  .swatch-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .swatch{border-radius:6px;padding:10px 14px;font-size:11px;font-weight:500;min-width:90px}
+
+  /* Type scale */
+  .type-row{display:flex;align-items:baseline;gap:16px;margin-bottom:16px;padding-bottom:16px;border-bottom:0.5px solid}
+  .sheet.light .type-row{border-color:#11111112}
+  .sheet.dark  .type-row{border-color:#ffffff12}
+  .type-meta{font-size:11px;min-width:130px;flex-shrink:0}
+  .sheet.light .type-meta{color:#888}
+  .sheet.dark  .type-meta{color:#666}
+
+  /* Spacing */
+  .space-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+  .space-bar{height:20px;border-radius:3px}
+  .sheet.light .space-bar{background:#4F7EF720}
+  .sheet.dark  .space-bar{background:#4F7EF740}
+  .space-label{font-size:11px}
+  .sheet.light .space-label{color:#888}
+  .sheet.dark  .space-label{color:#666}
+
+  /* Radius */
+  .radius-row{display:flex;gap:16px;align-items:flex-end;margin-top:8px}
+  .radius-box{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .radius-demo{width:48px;height:48px;border:1.5px solid #4F7EF7}
+  .sheet.light .radius-demo{background:#4F7EF710}
+  .sheet.dark  .radius-demo{background:#4F7EF730}
+
+  /* Components */
+  .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .comp-card{border-radius:12px;border:0.5px solid;padding:16px}
+  .sheet.light .comp-card{border-color:#11111118;background:#FAFAFA}
+  .sheet.dark  .comp-card{border-color:#ffffff18;background:#1A1A1A}
+  .comp-label{font-size:10px;letter-spacing:1.5px;font-weight:500;margin-bottom:12px}
+  .sheet.light .comp-label{color:#888}
+  .sheet.dark  .comp-label{color:#555}
+
+  /* Buttons */
+  .btn{display:inline-block;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:inherit;letter-spacing:.2px;transition:opacity .15s}
+  .btn-primary{background:#4F7EF7;color:#fff}
+  .btn-secondary{background:transparent;border:0.5px solid}
+  .sheet.light .btn-secondary{border-color:#11111130;color:#111}
+  .sheet.dark  .btn-secondary{border-color:#ffffff30;color:#fff}
+  .btn-ghost{background:transparent;padding:9px 0}
+  .sheet.light .btn-ghost{color:#4F7EF7}
+  .sheet.dark  .btn-ghost{color:#7BA4FF}
+  .btn-danger{background:#E24B4A;color:#fff}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+  /* Input */
+  .inp{width:100%;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+  .sheet.light .inp{border:0.5px solid #11111130;background:#fff;color:#111}
+  .sheet.dark  .inp{border:0.5px solid #ffffff25;background:#222;color:#fff}
+  .inp-label{font-size:12px;margin-bottom:6px;display:block}
+  .sheet.light .inp-label{color:#666}
+  .sheet.dark  .inp-label{color:#888}
+
+  /* Habit card */
+  .habit-card{border-radius:12px;border:0.5px solid;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .sheet.light .habit-card{border-color:#11111115;background:#fff}
+  .sheet.dark  .habit-card{border-color:#ffffff15;background:#1C1C1C}
+  .habit-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .habit-info{flex:1;margin:0 12px}
+  .habit-name{font-size:14px;font-weight:500}
+  .sheet.light .habit-name{color:#111}
+  .sheet.dark  .habit-name{color:#eee}
+  .habit-sub{font-size:11px;margin-top:2px}
+  .sheet.light .habit-sub{color:#888}
+  .sheet.dark  .habit-sub{color:#555}
+  .habit-check{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;border:1.5px solid}
+  .habit-check.done{background:#4F7EF7;border-color:#4F7EF7;color:#fff}
+  .sheet.light .habit-check.empty{border-color:#11111125}
+  .sheet.dark  .habit-check.empty{border-color:#ffffff25}
+
+  /* Tally mini */
+  .tally-mini{display:flex;align-items:flex-end;gap:3px}
+  .tally-mini span{display:block;width:3px;border-radius:1.5px}
+
+  /* Badge */
+  .badge{display:inline-block;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500}
+  .badge-blue{background:#E6F1FB;color:#0C447C}
+  .badge-green{background:#EAF3DE;color:#27500A}
+  .badge-amber{background:#FAEEDA;color:#633806}
+  .badge-red{background:#FCEBEB;color:#791F1F}
+  .sheet.dark .badge-blue{background:#0C447C;color:#B5D4F4}
+  .sheet.dark .badge-green{background:#27500A;color:#C0DD97}
+  .sheet.dark .badge-amber{background:#633806;color:#FAC775}
+  .sheet.dark .badge-red{background:#791F1F;color:#F7C1C1}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media(max-width:560px){.two-col,.comp-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="sheet light" id="sheet">
+
+  <div class="toggle-row">
+    <div class="logo-mark">
+      <div class="tally" id="tally-logo">
+        <span style="height:32px;background:#111"></span>
+        <span style="height:26px;background:#111"></span>
+        <span style="height:18px;background:#111"></span>
+        <span style="height:26px;background:#111"></span>
+        <span style="height:32px;background:#4F7EF7"></span>
+      </div>
+      <span class="wordmark" id="wm">notch</span>
+    </div>
+    <button class="toggle-btn" onclick="toggleMode()" id="modeBtn">dark mode</button>
+  </div>
+
+  <p class="section-label">COLOR PALETTE</p>
+  <div class="swatch-row">
+    <div class="swatch" style="background:#4F7EF7;color:#fff">accent<br>#4F7EF7</div>
+    <div class="swatch" id="sw-bg" style="background:#F5F5F3;color:#444">background<br>#F5F5F3</div>
+    <div class="swatch" id="sw-surface" style="background:#FFFFFF;border:0.5px solid #11111115;color:#444">surface<br>#FFFFFF</div>
+    <div class="swatch" id="sw-primary" style="background:#111111;color:#fff">text primary<br>#111111</div>
+    <div class="swatch" id="sw-secondary" style="background:#888888;color:#fff">text secondary<br>#888888</div>
+    <div class="swatch" style="background:#E24B4A;color:#fff">danger<br>#E24B4A</div>
+    <div class="swatch" style="background:#639922;color:#fff">success<br>#639922</div>
+    <div class="swatch" style="background:#BA7517;color:#fff">warning<br>#BA7517</div>
+  </div>
+
+  <div class="divider"></div>
+  <p class="section-label">TYPOGRAPHY</p>
+  <div>
+    <div class="type-row">
+      <span class="type-meta">Display · 34px · 500</span>
+      <span style="font-size:34px;font-weight:500;letter-spacing:-.5px">18 of 21 days</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">Title 1 · 24px · 500</span>
+      <span style="font-size:24px;font-weight:500">Today's habits</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">Title 2 · 18px · 500</span>
+      <span style="font-size:18px;font-weight:500">Morning routine</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">Body · 15px · 400</span>
+      <span style="font-size:15px;font-weight:400">You've been hitting this 86% of the time this month.</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">Caption · 12px · 400</span>
+      <span style="font-size:12px;font-weight:400;color:#888">Last logged 2 hours ago · source: watch</span>
+    </div>
+    <div class="type-row" style="border-bottom:none">
+      <span class="type-meta">Label · 10px · 500 · tracked</span>
+      <span style="font-size:10px;font-weight:500;letter-spacing:1.5px">EARN IT EVERY DAY</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="two-col">
+    <div>
+      <p class="section-label">SPACING</p>
+      <div class="space-row"><div class="space-bar" style="width:4px"></div><span class="space-label">4px — micro gap</span></div>
+      <div class="space-row"><div class="space-bar" style="width:8px"></div><span class="space-label">8px — tight gap</span></div>
+      <div class="space-row"><div class="space-bar" style="width:12px"></div><span class="space-label">12px — component gap</span></div>
+      <div class="space-row"><div class="space-bar" style="width:16px"></div><span class="space-label">16px — card padding</span></div>
+      <div class="space-row"><div class="space-bar" style="width:24px"></div><span class="space-label">24px — section gap</span></div>
+      <div class="space-row"><div class="space-bar" style="width:32px"></div><span class="space-label">32px — page padding</span></div>
+    </div>
+    <div>
+      <p class="section-label">BORDER RADIUS</p>
+      <div class="radius-row">
+        <div class="radius-box">
+          <div class="radius-demo" style="border-radius:4px"></div>
+          <span class="space-label">4px<br>sm</span>
+        </div>
+        <div class="radius-box">
+          <div class="radius-demo" style="border-radius:8px"></div>
+          <span class="space-label">8px<br>md</span>
+        </div>
+        <div class="radius-box">
+          <div class="radius-demo" style="border-radius:12px"></div>
+          <span class="space-label">12px<br>lg</span>
+        </div>
+        <div class="radius-box">
+          <div class="radius-demo" style="border-radius:20px"></div>
+          <span class="space-label">20px<br>pill</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <p class="section-label">COMPONENTS</p>
+  <div class="comp-grid">
+
+    <div class="comp-card">
+      <p class="comp-label">BUTTONS</p>
+      <div class="btn-row">
+        <button class="btn btn-primary">Log habit</button>
+        <button class="btn btn-secondary">Skip today</button>
+      </div>
+      <div style="margin-top:10px" class="btn-row">
+        <button class="btn btn-ghost">View streak →</button>
+        <button class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+
+    <div class="comp-card">
+      <p class="comp-label">INPUTS</p>
+      <label class="inp-label">Habit name</label>
+      <input class="inp" type="text" placeholder="e.g. Morning run" style="margin-bottom:10px">
+      <label class="inp-label">Log value</label>
+      <input class="inp" type="text" placeholder="6.2 miles">
+    </div>
+
+    <div class="comp-card" style="grid-column:1/-1">
+      <p class="comp-label">HABIT CARDS</p>
+      <div class="habit-card">
+        <div class="habit-dot" style="background:#4F7EF7"></div>
+        <div class="habit-info">
+          <div class="habit-name">Morning run</div>
+          <div class="habit-sub">86% this month · 12-day streak</div>
+        </div>
+        <div class="tally-mini">
+          <span style="height:18px;background:#4F7EF7"></span>
+          <span style="height:14px;background:#4F7EF7"></span>
+          <span style="height:9px;background:#4F7EF7"></span>
+          <span style="height:14px;background:#4F7EF7"></span>
+          <span style="height:18px;background:#4F7EF7"></span>
+        </div>
+        <div style="width:12px"></div>
+        <div class="habit-check done">✓</div>
+      </div>
+      <div class="habit-card">
+        <div class="habit-dot" style="background:#639922"></div>
+        <div class="habit-info">
+          <div class="habit-name">Meditate</div>
+          <div class="habit-sub">70% this month · 3-day streak</div>
+        </div>
+        <div class="tally-mini">
+          <span style="height:18px;background:#639922"></span>
+          <span style="height:12px;background:#639922"></span>
+          <span style="height:7px;background:#639922"></span>
+          <span style="height:12px;background:#639922"></span>
+          <span style="height:18px;background:#63992260"></span>
+        </div>
+        <div style="width:12px"></div>
+        <div class="habit-check empty"></div>
+      </div>
+    </div>
+
+    <div class="comp-card">
+      <p class="comp-label">BADGES</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge badge-blue">HealthKit</span>
+        <span class="badge badge-green">On track</span>
+        <span class="badge badge-amber">Missed</span>
+        <span class="badge badge-red">Streak lost</span>
+      </div>
+    </div>
+
+    <div class="comp-card">
+      <p class="comp-label">STAT CARD</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="border-radius:8px;padding:12px" id="stat-bg">
+          <div style="font-size:11px;margin-bottom:4px" id="stat-lbl">30-day rate</div>
+          <div style="font-size:22px;font-weight:500">86%</div>
+        </div>
+        <div style="border-radius:8px;padding:12px" id="stat-bg2">
+          <div style="font-size:11px;margin-bottom:4px" id="stat-lbl2">current streak</div>
+          <div style="font-size:22px;font-weight:500">12</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let dark = false;
+function toggleMode(){
+  dark = !dark;
+  const s = document.getElementById('sheet');
+  const btn = document.getElementById('modeBtn');
+  const tally = document.getElementById('tally-logo');
+  const wm = document.getElementById('wm');
+  const statBg = document.getElementById('stat-bg');
+  const statBg2 = document.getElementById('stat-bg2');
+  const statLbl = document.getElementById('stat-lbl');
+  const statLbl2 = document.getElementById('stat-lbl2');
+  const swBg = document.getElementById('sw-bg');
+  const swSurface = document.getElementById('sw-surface');
+  const swPrimary = document.getElementById('sw-primary');
+  const swSecondary = document.getElementById('sw-secondary');
+
+  if(dark){
+    s.className='sheet dark';
+    btn.textContent='light mode';
+    tally.querySelectorAll('span:not(:last-child)').forEach(el=>el.style.background='#fff');
+    wm.style.color='#fff';
+    swBg.style.background='#1A1A1A'; swBg.style.color='#888'; swBg.textContent='background\n#1A1A1A';
+    swSurface.style.background='#222'; swSurface.style.color='#888'; swSurface.style.border='0.5px solid #ffffff15'; swSurface.textContent='surface\n#222222';
+    swPrimary.style.background='#FFFFFF'; swPrimary.style.color='#111'; swPrimary.textContent='text primary\n#FFFFFF';
+    swSecondary.style.background='#666'; swSecondary.style.color='#ddd'; swSecondary.textContent='text secondary\n#666666';
+    statBg.style.background='#222'; statBg2.style.background='#222';
+    statLbl.style.color='#666'; statLbl2.style.color='#666';
+  } else {
+    s.className='sheet light';
+    btn.textContent='dark mode';
+    tally.querySelectorAll('span:not(:last-child)').forEach(el=>el.style.background='#111');
+    wm.style.color='#111';
+    swBg.style.background='#F5F5F3'; swBg.style.color='#444'; swBg.textContent='background\n#F5F5F3';
+    swSurface.style.background='#FFFFFF'; swSurface.style.color='#444'; swSurface.style.border='0.5px solid #11111115'; swSurface.textContent='surface\n#FFFFFF';
+    swPrimary.style.background='#111111'; swPrimary.style.color='#fff'; swPrimary.textContent='text primary\n#111111';
+    swSecondary.style.background='#888'; swSecondary.style.color='#fff'; swSecondary.textContent='text secondary\n#888888';
+    statBg.style.background='#F5F5F3'; statBg2.style.background='#F5F5F3';
+    statLbl.style.color='#888'; statLbl2.style.color='#888';
+  }
+}
+document.getElementById('stat-bg').style.background='#F5F5F3';
+document.getElementById('stat-bg2').style.background='#F5F5F3';
+document.getElementById('stat-lbl').style.color='#888';
+document.getElementById('stat-lbl2').style.color='#888';
+</script>

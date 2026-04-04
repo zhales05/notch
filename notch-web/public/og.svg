@@ -1,0 +1,21 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#111111"/>
+
+  <!-- Icon strokes centered -->
+  <g transform="translate(510, 160)">
+    <line x1="0"  y1="0"  x2="0"  y2="112" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <line x1="22" y1="14" x2="22" y2="112" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <line x1="44" y1="42" x2="44" y2="112" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <line x1="66" y1="14" x2="66" y2="112" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+    <line x1="88" y1="0"  x2="88" y2="112" stroke="#4F7EF7" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <!-- App name -->
+  <text x="600" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="#FFFFFF" text-anchor="middle">Notch</text>
+
+  <!-- Tagline -->
+  <text x="600" y="410" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#999999" text-anchor="middle">Habit tracking, simplified.</text>
+
+  <!-- URL -->
+  <text x="600" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#666666" text-anchor="middle">notchhabits.com</text>
+</svg>

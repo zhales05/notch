@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Light theme (default) ─── */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+
+  /* Surfaces */
+  --color-background: #F5F5F3;
+  --color-foreground: #111111;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #111111;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #111111;
+
+  /* Brand */
+  --color-primary: #4F7EF7;
+  --color-primary-foreground: #FFFFFF;
+
+  /* Neutral variants */
+  --color-secondary: #EBEBEA;
+  --color-secondary-foreground: #111111;
+  --color-muted: #EBEBEA;
+  --color-muted-foreground: #888888;
+  --color-accent: #EBEBEA;
+  --color-accent-foreground: #111111;
+
+  /* Semantic */
+  --color-destructive: #E24B4A;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success: #639922;
+  --color-success-foreground: #FFFFFF;
+  --color-warning: #BA7517;
+  --color-warning-foreground: #FFFFFF;
+
+  /* Borders & rings */
+  --color-border: #11111118;
+  --color-input: #11111130;
+  --color-ring: #4F7EF7;
+
+  /* Charts */
+  --color-chart-1: #4F7EF7;
+  --color-chart-2: #639922;
+  --color-chart-3: #BA7517;
+  --color-chart-4: #E24B4A;
+  --color-chart-5: #888888;
+
+  /* Radius — 8px base (md) per design sheet */
+  --radius: 0.5rem;
+
+  /* Sidebar dimensions */
+  --sidebar-width: 220px;
+
+  /* Sidebar */
+  --color-sidebar: #FFFFFF;
+  --color-sidebar-foreground: #111111;
+  --color-sidebar-primary: #4F7EF7;
+  --color-sidebar-primary-foreground: #FFFFFF;
+  --color-sidebar-accent: #EEF4FF;
+  --color-sidebar-accent-foreground: #4F7EF7;
+  --color-sidebar-border: #11111115;
+  --color-sidebar-ring: #4F7EF7;
+}
+
+/* ─── Dark theme ─── */
+.dark {
+  --color-background: #111111;
+  --color-foreground: #FFFFFF;
+  --color-card: #1A1A1A;
+  --color-card-foreground: #FFFFFF;
+  --color-popover: #1A1A1A;
+  --color-popover-foreground: #FFFFFF;
+
+  --color-primary: #4F7EF7;
+  --color-primary-foreground: #FFFFFF;
+
+  --color-secondary: #222222;
+  --color-secondary-foreground: #FFFFFF;
+  --color-muted: #222222;
+  --color-muted-foreground: #666666;
+  --color-accent: #222222;
+  --color-accent-foreground: #FFFFFF;
+
+  --color-destructive: #E24B4A;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success: #639922;
+  --color-success-foreground: #FFFFFF;
+  --color-warning: #BA7517;
+  --color-warning-foreground: #FFFFFF;
+
+  --color-border: #ffffff18;
+  --color-input: #ffffff25;
+  --color-ring: #7BA4FF;
+
+  --color-chart-1: #7BA4FF;
+  --color-chart-2: #8BC34A;
+  --color-chart-3: #FAC775;
+  --color-chart-4: #F7C1C1;
+  --color-chart-5: #666666;
+
+  --color-sidebar: #1A1A1A;
+  --color-sidebar-foreground: #FFFFFF;
+  --color-sidebar-primary: #4F7EF7;
+  --color-sidebar-primary-foreground: #FFFFFF;
+  --color-sidebar-accent: #1E2940;
+  --color-sidebar-accent-foreground: #7BA4FF;
+  --color-sidebar-border: #ffffff12;
+  --color-sidebar-ring: #7BA4FF;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
