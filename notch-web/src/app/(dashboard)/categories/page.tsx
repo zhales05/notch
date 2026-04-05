@@ -5,6 +5,7 @@ import { Plus, FolderPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCategories } from "@/hooks/use-categories"
+import { useProfile } from "@/hooks/use-profile"
 import { CategoryCard } from "@/components/categories/category-card"
 import { CategoryFormDialog } from "@/components/categories/category-form-dialog"
 import { DeleteCategoryDialog } from "@/components/categories/delete-category-dialog"
@@ -23,6 +24,9 @@ export default function CategoriesPage() {
     getHabitCount,
   } = useCategories()
 
+  const { profile } = useProfile()
+  const isPremium = profile?.plan === "premium"
+
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [deletingCategory, setDeletingCategory] = useState<Category | null>(
@@ -31,7 +35,7 @@ export default function CategoriesPage() {
   const [showUpgrade, setShowUpgrade] = useState(false)
 
   function handleNewCategory() {
-    if (activeCategoryCount >= 2) {
+    if (!isPremium && activeCategoryCount >= 2) {
       setShowUpgrade(true)
       return
     }
