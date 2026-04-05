@@ -18,6 +18,8 @@ const CONTRIBUTION_LABELS: Record<ContributionMode, string> = {
   count: "Count (logs)",
   value_sum: "Value Sum",
   streak: "Streak (days)",
+  best_min: "Best (lowest)",
+  best_max: "Best (highest)",
 }
 
 export function GoalHabitRow({
@@ -43,10 +45,10 @@ export function GoalHabitRow({
           onChange({
             ...entry,
             habit_id: e.target.value,
-            // Reset to count if switching to a boolean habit with value_sum selected
+            // Reset to count if switching to a boolean habit with a value-dependent mode
             contribution_mode:
               habits.find((h) => h.id === e.target.value)?.log_type ===
-                "boolean" && entry.contribution_mode === "value_sum"
+                "boolean" && ["value_sum", "best_min", "best_max"].includes(entry.contribution_mode)
                 ? "count"
                 : entry.contribution_mode,
           })
@@ -76,7 +78,7 @@ export function GoalHabitRow({
           <option
             key={mode}
             value={mode}
-            disabled={isBooleanHabit && mode === "value_sum"}
+            disabled={isBooleanHabit && ["value_sum", "best_min", "best_max"].includes(mode)}
           >
             {label}
           </option>

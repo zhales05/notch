@@ -1,7 +1,7 @@
 import type { Category } from "./categories"
 
 export type GoalStatus = "active" | "completed" | "paused" | "abandoned"
-export type ContributionMode = "count" | "value_sum" | "streak"
+export type ContributionMode = "count" | "value_sum" | "streak" | "best_min" | "best_max"
 
 export interface Goal {
   id: string
@@ -45,6 +45,7 @@ export interface GoalProgress {
   current_value: number
   target_value: number
   percentage: number
+  best_value?: number | null
 }
 
 export interface GoalFormData {

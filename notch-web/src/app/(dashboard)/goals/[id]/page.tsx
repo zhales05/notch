@@ -29,6 +29,8 @@ const CONTRIBUTION_LABELS: Record<ContributionMode, string> = {
   count: "Count (logs)",
   value_sum: "Value Sum",
   streak: "Streak (days)",
+  best_min: "Best (lowest)",
+  best_max: "Best (highest)",
 }
 
 export default function GoalDetailPage() {
@@ -128,6 +130,20 @@ export default function GoalDetailPage() {
     })
   }
 
+  const isPerformanceGoal = linkedHabits.some(
+    (lh) =>
+      lh.contribution_mode === "best_min" ||
+      lh.contribution_mode === "best_max"
+  )
+  const hasBestMin = linkedHabits.some(
+    (lh) => lh.contribution_mode === "best_min"
+  )
+  const targetPrefix = isPerformanceGoal
+    ? hasBestMin
+      ? "Under "
+      : "Over "
+    : ""
+
   return (
     <div>
       <Button
@@ -196,7 +212,7 @@ export default function GoalDetailPage() {
           <CardContent>
             <p className="text-xs text-muted-foreground">Target</p>
             <p className="text-lg font-semibold">
-              {goal.target_value}
+              {targetPrefix}{goal.target_value}
               {goal.unit ? ` ${goal.unit}` : ""}
             </p>
           </CardContent>
@@ -232,6 +248,8 @@ export default function GoalDetailPage() {
             currentValue={progress.current_value}
             targetValue={progress.target_value}
             unit={goal.unit}
+            bestValue={progress.best_value}
+            isPerformanceGoal={isPerformanceGoal}
           />
         </div>
       )}
