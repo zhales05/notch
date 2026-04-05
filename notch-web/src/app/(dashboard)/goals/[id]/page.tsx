@@ -130,16 +130,9 @@ export default function GoalDetailPage() {
     })
   }
 
-  const isPerformanceGoal = linkedHabits.some(
-    (lh) =>
-      lh.contribution_mode === "best_min" ||
-      lh.contribution_mode === "best_max"
-  )
-  const hasBestMin = linkedHabits.some(
-    (lh) => lh.contribution_mode === "best_min"
-  )
+  const isPerformanceGoal = goal.goal_type === "best_min" || goal.goal_type === "best_max"
   const targetPrefix = isPerformanceGoal
-    ? hasBestMin
+    ? goal.goal_type === "best_min"
       ? "Under "
       : "Over "
     : ""

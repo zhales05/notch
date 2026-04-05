@@ -131,6 +131,7 @@ export function useGoals(statusFilter?: GoalStatus) {
           user_id: user.id,
           title: formData.title,
           description: formData.description || null,
+          goal_type: formData.goal_type,
           category_id: formData.category_id,
           target_value: formData.target_value,
           unit: formData.unit || null,
@@ -186,6 +187,8 @@ export function useGoals(statusFilter?: GoalStatus) {
       if (goalFields.title !== undefined) updateData.title = goalFields.title
       if (goalFields.description !== undefined)
         updateData.description = goalFields.description || null
+      if (goalFields.goal_type !== undefined)
+        updateData.goal_type = goalFields.goal_type
       if (goalFields.category_id !== undefined)
         updateData.category_id = goalFields.category_id
       if (goalFields.target_value !== undefined)

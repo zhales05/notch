@@ -4,12 +4,13 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { HabitWithCategory } from "@/lib/types/habits"
-import type { GoalHabitFormEntry, ContributionMode } from "@/lib/types/goals"
+import type { GoalHabitFormEntry, ContributionMode, GoalType } from "@/lib/types/goals"
 
 interface GoalHabitRowProps {
   entry: GoalHabitFormEntry
   habits: HabitWithCategory[]
   alreadyLinkedIds: string[]
+  goalType?: GoalType
   onChange: (entry: GoalHabitFormEntry) => void
   onRemove: () => void
 }
@@ -22,10 +23,13 @@ const CONTRIBUTION_LABELS: Record<ContributionMode, string> = {
   best_max: "Best (highest)",
 }
 
+const ACCUMULATION_MODES: ContributionMode[] = ["count", "value_sum", "streak"]
+
 export function GoalHabitRow({
   entry,
   habits,
   alreadyLinkedIds,
+  goalType = "accumulate",
   onChange,
   onRemove,
 }: GoalHabitRowProps) {
@@ -35,6 +39,7 @@ export function GoalHabitRow({
 
   const selectedHabit = habits.find((h) => h.id === entry.habit_id)
   const isBooleanHabit = selectedHabit?.log_type === "boolean"
+  const isPerformanceGoal = goalType !== "accumulate"
 
   return (
     <div className="flex items-center gap-2">
@@ -62,40 +67,42 @@ export function GoalHabitRow({
         ))}
       </select>
 
-      <select
-        className="h-9 w-[130px] shrink-0 rounded-md border border-input bg-background px-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        value={entry.contribution_mode}
-        onChange={(e) =>
-          onChange({
-            ...entry,
-            contribution_mode: e.target.value as ContributionMode,
-          })
-        }
-      >
-        {(
-          Object.entries(CONTRIBUTION_LABELS) as [ContributionMode, string][]
-        ).map(([mode, label]) => (
-          <option
-            key={mode}
-            value={mode}
-            disabled={isBooleanHabit && ["value_sum", "best_min", "best_max"].includes(mode)}
-          >
-            {label}
-          </option>
-        ))}
-      </select>
+      {!isPerformanceGoal && (
+        <select
+          className="h-9 w-[130px] shrink-0 rounded-md border border-input bg-background px-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          value={entry.contribution_mode}
+          onChange={(e) =>
+            onChange({
+              ...entry,
+              contribution_mode: e.target.value as ContributionMode,
+            })
+          }
+        >
+          {ACCUMULATION_MODES.map((mode) => (
+            <option
+              key={mode}
+              value={mode}
+              disabled={isBooleanHabit && mode === "value_sum"}
+            >
+              {CONTRIBUTION_LABELS[mode]}
+            </option>
+          ))}
+        </select>
+      )}
 
-      <Input
-        type="number"
-        step="0.1"
-        min="0.1"
-        className="h-9 w-[70px] shrink-0"
-        placeholder="Weight"
-        value={entry.weight}
-        onChange={(e) =>
-          onChange({ ...entry, weight: parseFloat(e.target.value) || 1 })
-        }
-      />
+      {!isPerformanceGoal && (
+        <Input
+          type="number"
+          step="0.1"
+          min="0.1"
+          className="h-9 w-[70px] shrink-0"
+          placeholder="Weight"
+          value={entry.weight}
+          onChange={(e) =>
+            onChange({ ...entry, weight: parseFloat(e.target.value) || 1 })
+          }
+        />
+      )}
 
       <Button
         type="button"

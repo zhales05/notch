@@ -21,6 +21,7 @@ import type {
   GoalWithCategory,
   GoalFormData,
   GoalHabitFormEntry,
+  GoalType,
 } from "@/lib/types/goals"
 
 interface GoalFormDialogProps {
@@ -44,6 +45,7 @@ export function GoalFormDialog({
 }: GoalFormDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [goalType, setGoalType] = useState<GoalType>("accumulate")
   const [categoryId, setCategoryId] = useState<string | null>(null)
   const [targetValue, setTargetValue] = useState("")
   const [unit, setUnit] = useState("")
@@ -60,6 +62,7 @@ export function GoalFormDialog({
       if (goal) {
         setTitle(goal.title)
         setDescription(goal.description ?? "")
+        setGoalType(goal.goal_type ?? "accumulate")
         setCategoryId(goal.category_id)
         setTargetValue(String(goal.target_value))
         setUnit(goal.unit ?? "")
@@ -69,6 +72,7 @@ export function GoalFormDialog({
       } else {
         setTitle("")
         setDescription("")
+        setGoalType("accumulate")
         setCategoryId(null)
         setTargetValue("")
         setUnit("")
@@ -130,6 +134,7 @@ export function GoalFormDialog({
       await onSubmit({
         title: trimmedTitle,
         description: description.trim(),
+        goal_type: goalType,
         category_id: categoryId,
         target_value: numericTarget,
         unit: unit.trim(),
@@ -184,6 +189,20 @@ export function GoalFormDialog({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="goal-type">Goal Type</Label>
+            <select
+              id="goal-type"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={goalType}
+              onChange={(e) => setGoalType(e.target.value as GoalType)}
+            >
+              <option value="accumulate">Accumulate toward target</option>
+              <option value="best_min">Get under target (e.g. race time)</option>
+              <option value="best_max">Get over target (e.g. max lift)</option>
+            </select>
           </div>
 
           <div className="grid gap-2">
@@ -275,6 +294,7 @@ export function GoalFormDialog({
                     entry={entry}
                     habits={activeHabits}
                     alreadyLinkedIds={alreadyLinkedIds}
+                    goalType={goalType}
                     onChange={(updated) => updateHabitRow(index, updated)}
                     onRemove={() => removeHabitRow(index)}
                   />
