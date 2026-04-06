@@ -53,4 +53,5 @@ export interface HabitFormData {
   daily_target: number | null
   color: string
   icon: string
+  goal_ids: string[]
 }

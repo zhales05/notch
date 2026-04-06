@@ -22,12 +22,15 @@ import type {
   FrequencyType,
   FrequencyConfig,
 } from "@/lib/types/habits"
+import type { GoalWithCategory } from "@/lib/types/goals"
 
 interface HabitFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   habit: HabitWithCategory | null
   categories: Category[]
+  goals?: GoalWithCategory[]
+  existingGoalIds?: string[]
   onSubmit: (data: HabitFormData) => Promise<void>
 }
 
@@ -36,6 +39,8 @@ export function HabitFormDialog({
   onOpenChange,
   habit,
   categories,
+  goals = [],
+  existingGoalIds = [],
   onSubmit,
 }: HabitFormDialogProps) {
   const [title, setTitle] = useState("")
@@ -51,6 +56,7 @@ export function HabitFormDialog({
   const [unit, setUnit] = useState("")
   const [color, setColor] = useState("#6366f1")
   const [icon, setIcon] = useState("check")
+  const [selectedGoalIds, setSelectedGoalIds] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -73,6 +79,7 @@ export function HabitFormDialog({
         }
         setColor(habit.color)
         setIcon(habit.icon)
+        setSelectedGoalIds(existingGoalIds)
 
         // Normalize legacy weekly/monthly into x_per_period for the form
         if (habit.frequency === "weekly") {
@@ -111,10 +118,11 @@ export function HabitFormDialog({
         setDailyTarget("")
         setColor("#6366f1")
         setIcon("check")
+        setSelectedGoalIds([])
       }
       setError(null)
     }
-  }, [open, habit])
+  }, [open, habit, existingGoalIds])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -174,6 +182,7 @@ export function HabitFormDialog({
         daily_target: parsedDailyTarget,
         color,
         icon,
+        goal_ids: selectedGoalIds,
       })
       onOpenChange(false)
     } catch {
@@ -412,6 +421,40 @@ export function HabitFormDialog({
             <Label>Icon</Label>
             <IconPicker value={icon} onChange={setIcon} color={color} />
           </div>
+
+          {goals.filter((g) => g.goal_type !== "milestone").length > 0 && (
+            <div className="grid gap-2">
+              <Label>Link to Goals</Label>
+              <div className="grid gap-1.5 rounded-md border border-input p-2">
+                {goals.filter((g) => g.goal_type !== "milestone").map((goal) => (
+                  <label
+                    key={goal.id}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-input"
+                      checked={selectedGoalIds.includes(goal.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedGoalIds((prev) => [...prev, goal.id])
+                        } else {
+                          setSelectedGoalIds((prev) =>
+                            prev.filter((id) => id !== goal.id)
+                          )
+                        }
+                      }}
+                    />
+                    <span>{goal.title}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Selected goals will automatically track this habit&apos;s
+                progress.
+              </p>
+            </div>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 

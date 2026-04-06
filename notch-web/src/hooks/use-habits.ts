@@ -89,6 +89,18 @@ export function useHabits(showArchived = false) {
         return null
       }
 
+      // Link habit to goals
+      if (formData.goal_ids && formData.goal_ids.length > 0) {
+        await supabase.from("goal_habits").insert(
+          formData.goal_ids.map((goalId) => ({
+            goal_id: goalId,
+            habit_id: data.id,
+            contribution_mode: "count" as const,
+            weight: 1,
+          }))
+        )
+      }
+
       setHabits((prev) => [...prev, data])
       return data
     },
@@ -102,7 +114,8 @@ export function useHabits(showArchived = false) {
     ): Promise<HabitWithCategory | null> => {
       setError(null)
 
-      const updateData: Record<string, unknown> = { ...formData }
+      const { goal_ids, ...rest } = formData
+      const updateData: Record<string, unknown> = { ...rest }
       if (formData.log_type === "boolean") {
         updateData.unit = null
         updateData.daily_target = null
@@ -118,6 +131,22 @@ export function useHabits(showArchived = false) {
       if (updateError) {
         setError(updateError.message)
         return null
+      }
+
+      // Replace goal links if provided
+      if (goal_ids !== undefined) {
+        await supabase.from("goal_habits").delete().eq("habit_id", id)
+
+        if (goal_ids.length > 0) {
+          await supabase.from("goal_habits").insert(
+            goal_ids.map((goalId) => ({
+              goal_id: goalId,
+              habit_id: id,
+              contribution_mode: "count" as const,
+              weight: 1,
+            }))
+          )
+        }
       }
 
       setHabits((prev) => prev.map((h) => (h.id === id ? data : h)))
