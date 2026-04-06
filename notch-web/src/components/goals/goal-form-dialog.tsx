@@ -64,7 +64,7 @@ export function GoalFormDialog({
         setDescription(goal.description ?? "")
         setGoalType(goal.goal_type ?? "accumulate")
         setCategoryId(goal.category_id)
-        setTargetValue(String(goal.target_value))
+        setTargetValue(goal.target_value != null ? String(goal.target_value) : "")
         setUnit(goal.unit ?? "")
         setStartDate(goal.start_date)
         setEndDate(goal.end_date ?? "")
@@ -108,10 +108,15 @@ export function GoalFormDialog({
       return
     }
 
-    const numericTarget = parseFloat(targetValue)
-    if (!targetValue || isNaN(numericTarget) || numericTarget <= 0) {
-      setError("Target value must be a positive number")
-      return
+    const isMilestone = goalType === "milestone"
+    let numericTarget: number | null = null
+
+    if (!isMilestone) {
+      numericTarget = parseFloat(targetValue)
+      if (!targetValue || isNaN(numericTarget) || numericTarget <= 0) {
+        setError("Target value must be a positive number")
+        return
+      }
     }
 
     if (!startDate) {
@@ -119,12 +124,18 @@ export function GoalFormDialog({
       return
     }
 
-    // Validate linked habits have selections
-    const validLinkedHabits = linkedHabits.filter((lh) => lh.habit_id)
-    const hasEmptyRows = linkedHabits.some((lh) => !lh.habit_id)
-    if (hasEmptyRows && linkedHabits.length > 0) {
-      setError("Please select a habit for each linked row or remove empty rows")
-      return
+    // Validate linked habits have selections (not applicable for milestone goals)
+    const validLinkedHabits = isMilestone
+      ? []
+      : linkedHabits.filter((lh) => lh.habit_id)
+    if (!isMilestone) {
+      const hasEmptyRows = linkedHabits.some((lh) => !lh.habit_id)
+      if (hasEmptyRows && linkedHabits.length > 0) {
+        setError(
+          "Please select a habit for each linked row or remove empty rows"
+        )
+        return
+      }
     }
 
     setIsSubmitting(true)
@@ -137,7 +148,7 @@ export function GoalFormDialog({
         goal_type: goalType,
         category_id: categoryId,
         target_value: numericTarget,
-        unit: unit.trim(),
+        unit: isMilestone ? "" : unit.trim(),
         start_date: startDate,
         end_date: endDate,
         linked_habits: validLinkedHabits,
@@ -173,7 +184,7 @@ export function GoalFormDialog({
             <Label htmlFor="goal-title">Title</Label>
             <Input
               id="goal-title"
-              placeholder="e.g. Run 50 miles this month"
+              placeholder="e.g. Run 50 miles this month, Become a senior developer"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               autoFocus
@@ -202,6 +213,7 @@ export function GoalFormDialog({
               <option value="accumulate">Accumulate toward target</option>
               <option value="best_min">Get under target (e.g. race time)</option>
               <option value="best_max">Get over target (e.g. max lift)</option>
+              <option value="milestone">Milestone (non-numeric)</option>
             </select>
           </div>
 
@@ -222,29 +234,31 @@ export function GoalFormDialog({
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label htmlFor="goal-target">Target Value</Label>
-              <Input
-                id="goal-target"
-                type="number"
-                step="any"
-                min="0.01"
-                placeholder="e.g. 50"
-                value={targetValue}
-                onChange={(e) => setTargetValue(e.target.value)}
-              />
+          {goalType !== "milestone" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label htmlFor="goal-target">Target Value</Label>
+                <Input
+                  id="goal-target"
+                  type="number"
+                  step="any"
+                  min="0.01"
+                  placeholder="e.g. 50"
+                  value={targetValue}
+                  onChange={(e) => setTargetValue(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="goal-unit">Unit</Label>
+                <Input
+                  id="goal-unit"
+                  placeholder="e.g. miles, pages"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="goal-unit">Unit</Label>
-              <Input
-                id="goal-unit"
-                placeholder="e.g. miles, pages"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-              />
-            </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
@@ -267,41 +281,50 @@ export function GoalFormDialog({
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between">
-              <Label>Linked Habits</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addHabitRow}
-                disabled={activeHabits.length === 0}
-              >
-                <Plus className="size-3.5" />
-                Add Habit
-              </Button>
-            </div>
-            {linkedHabits.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No habits linked yet. Add habits to track progress
-                automatically.
-              </p>
-            ) : (
-              <div className="grid gap-2">
-                {linkedHabits.map((entry, index) => (
-                  <GoalHabitRow
-                    key={index}
-                    entry={entry}
-                    habits={activeHabits}
-                    alreadyLinkedIds={alreadyLinkedIds}
-                    goalType={goalType}
-                    onChange={(updated) => updateHabitRow(index, updated)}
-                    onRemove={() => removeHabitRow(index)}
-                  />
-                ))}
+          {goalType !== "milestone" && (
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label>Linked Habits</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addHabitRow}
+                  disabled={activeHabits.length === 0}
+                >
+                  <Plus className="size-3.5" />
+                  Add Habit
+                </Button>
               </div>
-            )}
-          </div>
+              {linkedHabits.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No habits linked yet. Add habits to track progress
+                  automatically.
+                </p>
+              ) : (
+                <div className="grid gap-2">
+                  {linkedHabits.map((entry, index) => (
+                    <GoalHabitRow
+                      key={index}
+                      entry={entry}
+                      habits={activeHabits}
+                      alreadyLinkedIds={alreadyLinkedIds}
+                      goalType={goalType}
+                      onChange={(updated) => updateHabitRow(index, updated)}
+                      onRemove={() => removeHabitRow(index)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {goalType === "milestone" && (
+            <p className="text-sm text-muted-foreground">
+              Milestone goals don&apos;t have a numeric target. Mark the goal as
+              completed when you achieve it.
+            </p>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 

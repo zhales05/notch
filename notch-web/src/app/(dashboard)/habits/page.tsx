@@ -1,15 +1,18 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useCallback } from "react"
 import { Plus, AlignJustify } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHabits } from "@/hooks/use-habits"
 import { useCategories } from "@/hooks/use-categories"
+import { useGoals } from "@/hooks/use-goals"
+import { useProfile } from "@/hooks/use-profile"
 import { HabitCard } from "@/components/habits/habit-card"
 import { HabitFormDialog } from "@/components/habits/habit-form-dialog"
 import { ArchiveHabitDialog } from "@/components/habits/archive-habit-dialog"
 import { UpgradePrompt } from "@/components/upgrade-prompt"
+import { createClient } from "@/lib/supabase/client"
 import type { HabitWithCategory, HabitFormData } from "@/lib/types/habits"
 
 export default function HabitsPage() {
@@ -26,11 +29,16 @@ export default function HabitsPage() {
   } = useHabits(showArchived)
 
   const { categories } = useCategories()
+  const { goals } = useGoals("active")
+  const { profile } = useProfile()
+
+  const isFreeUser = profile?.plan === "free"
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingHabit, setEditingHabit] = useState<HabitWithCategory | null>(
     null
   )
+  const [editingGoalIds, setEditingGoalIds] = useState<string[]>([])
   const [archivingHabit, setArchivingHabit] =
     useState<HabitWithCategory | null>(null)
   const [showUpgrade, setShowUpgrade] = useState(false)
@@ -59,23 +67,36 @@ export default function HabitsPage() {
     })
   }, [habits])
 
+  const supabase = createClient()
+
   function handleNewHabit() {
-    if (activeHabitCount >= 4) {
+    if (isFreeUser && activeHabitCount >= 4) {
       setShowUpgrade(true)
       return
     }
     setShowUpgrade(false)
+    setEditingGoalIds([])
     setIsFormOpen(true)
   }
 
-  function handleEdit(habit: HabitWithCategory) {
+  const handleEdit = useCallback(async (habit: HabitWithCategory) => {
+    // Fetch existing goal links for this habit
+    const { data } = await supabase
+      .from("goal_habits")
+      .select("goal_id")
+      .eq("habit_id", habit.id)
+
+    setEditingGoalIds(data?.map((gh) => gh.goal_id) ?? [])
     setEditingHabit(habit)
     setIsFormOpen(true)
-  }
+  }, [supabase])
 
   function handleFormClose(open: boolean) {
     setIsFormOpen(open)
-    if (!open) setEditingHabit(null)
+    if (!open) {
+      setEditingHabit(null)
+      setEditingGoalIds([])
+    }
   }
 
   async function handleSubmit(data: HabitFormData) {
@@ -176,6 +197,8 @@ export default function HabitsPage() {
         onOpenChange={handleFormClose}
         habit={editingHabit}
         categories={categories}
+        goals={goals}
+        existingGoalIds={editingGoalIds}
         onSubmit={handleSubmit}
       />
 

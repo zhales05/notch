@@ -43,8 +43,9 @@ export function GoalCard({
           <div className="min-w-0 flex-1">
             <span className="truncate font-medium">{goal.title}</span>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {goal.target_value}
-              {goal.unit ? ` ${goal.unit}` : ""}
+              {goal.goal_type === "milestone"
+                ? "Milestone"
+                : `${goal.target_value}${goal.unit ? ` ${goal.unit}` : ""}`}
               {goal.category && (
                 <>
                   <span>&middot;</span>

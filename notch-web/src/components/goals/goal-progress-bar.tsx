@@ -9,6 +9,7 @@ interface GoalProgressBarProps {
   className?: string
   bestValue?: number | null
   isPerformanceGoal?: boolean
+  isMilestone?: boolean
 }
 
 export function GoalProgressBar({
@@ -20,6 +21,7 @@ export function GoalProgressBar({
   className,
   bestValue,
   isPerformanceGoal = false,
+  isMilestone = false,
 }: GoalProgressBarProps) {
   const clampedPercentage = Math.min(100, Math.max(0, percentage))
 
@@ -42,11 +44,15 @@ export function GoalProgressBar({
       {!compact && (
         <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {isPerformanceGoal && bestValue != null && targetValue !== undefined
-              ? `Best: ${bestValue} / Target: ${targetValue}${unit ? ` ${unit}` : ""}`
-              : currentValue !== undefined && targetValue !== undefined
-                ? `${currentValue} / ${targetValue}${unit ? ` ${unit}` : ""}`
-                : `${clampedPercentage}% complete`}
+            {isMilestone
+              ? clampedPercentage >= 100
+                ? "Completed"
+                : "In progress"
+              : isPerformanceGoal && bestValue != null && targetValue !== undefined
+                ? `Best: ${bestValue} / Target: ${targetValue}${unit ? ` ${unit}` : ""}`
+                : currentValue !== undefined && targetValue !== undefined
+                  ? `${currentValue} / ${targetValue}${unit ? ` ${unit}` : ""}`
+                  : `${clampedPercentage}% complete`}
           </span>
           <span>{clampedPercentage}%</span>
         </div>
