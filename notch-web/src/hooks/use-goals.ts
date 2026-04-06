@@ -133,7 +133,7 @@ export function useGoals(statusFilter?: GoalStatus) {
           description: formData.description || null,
           goal_type: formData.goal_type,
           category_id: formData.category_id,
-          target_value: formData.target_value,
+          target_value: formData.target_value ?? null,
           unit: formData.unit || null,
           start_date: formData.start_date,
           end_date: formData.end_date || null,

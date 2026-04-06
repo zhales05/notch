@@ -130,6 +130,7 @@ export default function GoalDetailPage() {
     })
   }
 
+  const isMilestone = goal.goal_type === "milestone"
   const isPerformanceGoal = goal.goal_type === "best_min" || goal.goal_type === "best_max"
   const targetPrefix = isPerformanceGoal
     ? goal.goal_type === "best_min"
@@ -203,10 +204,13 @@ export default function GoalDetailPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card size="sm">
           <CardContent>
-            <p className="text-xs text-muted-foreground">Target</p>
+            <p className="text-xs text-muted-foreground">
+              {isMilestone ? "Type" : "Target"}
+            </p>
             <p className="text-lg font-semibold">
-              {targetPrefix}{goal.target_value}
-              {goal.unit ? ` ${goal.unit}` : ""}
+              {isMilestone
+                ? "Milestone"
+                : `${targetPrefix}${goal.target_value}${goal.unit ? ` ${goal.unit}` : ""}`}
             </p>
           </CardContent>
         </Card>
@@ -238,15 +242,17 @@ export default function GoalDetailPage() {
         <div className="mt-6">
           <GoalProgressBar
             percentage={progress.percentage}
-            currentValue={progress.current_value}
-            targetValue={progress.target_value}
+            currentValue={isMilestone ? undefined : progress.current_value}
+            targetValue={progress.target_value ?? undefined}
             unit={goal.unit}
             bestValue={progress.best_value}
             isPerformanceGoal={isPerformanceGoal}
+            isMilestone={isMilestone}
           />
         </div>
       )}
 
+      {!isMilestone && (
       <div className="mt-8">
         <h2 className="mb-3 text-sm font-medium text-muted-foreground">
           Linked Habits
@@ -306,6 +312,7 @@ export default function GoalDetailPage() {
           </div>
         )}
       </div>
+      )}
 
       <GoalFormDialog
         open={isFormOpen}
