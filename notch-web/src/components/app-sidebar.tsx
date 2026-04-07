@@ -8,6 +8,7 @@ import {
   Grid2x2,
   CircleDot,
   TrendingUp,
+  Gauge,
   Settings2,
   Sparkles,
 } from "lucide-react";
@@ -31,6 +32,7 @@ const navItems = [
   { title: "Habits", href: "/habits", icon: AlignJustify },
   { title: "Categories", href: "/categories", icon: Grid2x2 },
   { title: "Goals", href: "/goals", icon: CircleDot },
+  { title: "Measures", href: "/measures", icon: Gauge },
   { title: "Analytics", href: "/analytics", icon: TrendingUp },
   { title: "Settings", href: "/settings", icon: Settings2 },
 ];

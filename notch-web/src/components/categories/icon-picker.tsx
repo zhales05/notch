@@ -22,6 +22,10 @@ import {
   GraduationCap,
   Home,
   Utensils,
+  Gauge,
+  Footprints,
+  BedDouble,
+  Activity,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -46,6 +50,10 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   "graduation-cap": GraduationCap,
   home: Home,
   utensils: Utensils,
+  gauge: Gauge,
+  footprints: Footprints,
+  bed: BedDouble,
+  activity: Activity,
 }
 
 const ICON_ENTRIES = Object.entries(ICON_MAP)

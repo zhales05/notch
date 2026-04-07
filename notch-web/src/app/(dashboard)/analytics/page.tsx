@@ -7,8 +7,11 @@ import { useHabits } from "@/hooks/use-habits"
 import { useProfile } from "@/hooks/use-profile"
 import { useHabitStats } from "@/hooks/use-habit-stats"
 import { useCategoryStats } from "@/hooks/use-category-stats"
+import { useMeasures } from "@/hooks/use-measures"
+import { useMeasureStats } from "@/hooks/use-measure-stats"
 import { DateRangeToggle } from "@/components/analytics/date-range-toggle"
 import { HabitSelectorPills } from "@/components/analytics/habit-selector-pills"
+import { MeasureSelectorPills } from "@/components/analytics/measure-selector-pills"
 import { StatCard } from "@/components/analytics/stat-card"
 import { HeatmapCard } from "@/components/analytics/heatmap-card"
 import { WeeklyTrendCard } from "@/components/analytics/weekly-trend-card"
@@ -16,7 +19,7 @@ import { MonthlyBarCard } from "@/components/analytics/monthly-bar-card"
 import { CategoryStatsList } from "@/components/analytics/category-stats-list"
 import type { DateRange } from "@/lib/types/analytics"
 
-type Tab = "habit" | "category"
+type Tab = "habit" | "category" | "measures"
 
 export default function AnalyticsPage() {
   const { profile } = useProfile()
@@ -32,6 +35,7 @@ export default function AnalyticsPage() {
   const effectiveDateRange = isFreeUser ? "30d" : dateRange
   const [activeTab, setActiveTab] = useState<Tab>("habit")
   const [selectedHabitId, setSelectedHabitId] = useState<string | null>(null)
+  const [selectedMeasureId, setSelectedMeasureId] = useState<string | null>(null)
 
   // Auto-select first habit once loaded
   const effectiveHabitId = selectedHabitId ?? activeHabits[0]?.id ?? null
@@ -45,6 +49,25 @@ export default function AnalyticsPage() {
 
   const { categoryStats, isLoading: categoryLoading } =
     useCategoryStats(effectiveDateRange)
+
+  // Measures
+  const { measures } = useMeasures()
+  const activeMeasures = useMemo(
+    () => measures.filter((m) => !m.archived_at),
+    [measures]
+  )
+  const effectiveMeasureId = selectedMeasureId ?? activeMeasures[0]?.id ?? null
+  const selectedMeasure = activeMeasures.find((m) => m.id === effectiveMeasureId)
+
+  const { stats: measureStats, isLoading: measureStatsLoading } =
+    useMeasureStats(
+      effectiveMeasureId,
+      effectiveDateRange,
+      selectedMeasure?.created_at
+    )
+
+  const measureColor = selectedMeasure?.color ?? "#6366f1"
+  const measureUnit = selectedMeasure?.unit ?? ""
 
   const habitColor = selectedHabit?.color ?? "#6366f1"
   const isValueHabit = selectedHabit?.log_type === "value" || selectedHabit?.log_type === "time"
@@ -94,6 +117,13 @@ export default function AnalyticsPage() {
           onClick={() => setActiveTab("category")}
         >
           By Category
+        </Button>
+        <Button
+          variant={activeTab === "measures" ? "secondary" : "outline"}
+          size="sm"
+          onClick={() => setActiveTab("measures")}
+        >
+          Measures
         </Button>
       </div>
 
@@ -194,6 +224,80 @@ export default function AnalyticsPage() {
       {/* Category tab */}
       {activeTab === "category" && (
         <CategoryStatsList stats={categoryStats} isLoading={categoryLoading} />
+      )}
+
+      {/* Measures tab */}
+      {activeTab === "measures" && (
+        <div className="grid gap-6">
+          <MeasureSelectorPills
+            measures={activeMeasures}
+            selectedId={effectiveMeasureId}
+            onSelect={setSelectedMeasureId}
+          />
+
+          {activeMeasures.length === 0 ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              Create some measures first to see analytics.
+            </p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <StatCard
+                  title="Daily Avg"
+                  value={measureStats?.dailyAvg ?? 0}
+                  suffix={measureUnit ? ` ${measureUnit}` : undefined}
+                  description="when logged"
+                  isLoading={measureStatsLoading}
+                />
+                <StatCard
+                  title="Total Logs"
+                  value={measureStats?.totalLogs ?? 0}
+                  isLoading={measureStatsLoading}
+                />
+                <StatCard
+                  title="Min"
+                  value={measureStats?.minValue ?? 0}
+                  suffix={measureUnit ? ` ${measureUnit}` : undefined}
+                  description="lowest recorded"
+                  isLoading={measureStatsLoading}
+                />
+                <StatCard
+                  title="Max"
+                  value={measureStats?.maxValue ?? 0}
+                  suffix={measureUnit ? ` ${measureUnit}` : undefined}
+                  description="highest recorded"
+                  isLoading={measureStatsLoading}
+                />
+              </div>
+
+              <HeatmapCard
+                data={measureStats?.heatmapData ?? []}
+                habitColor={measureColor}
+                logType="value"
+                unit={measureUnit}
+                dateRange={effectiveDateRange}
+                isLoading={measureStatsLoading}
+              />
+
+              <div className="grid gap-6">
+                <WeeklyTrendCard
+                  data={measureStats?.weeklyTrend ?? []}
+                  habitColor={measureColor}
+                  logType="value"
+                  unit={measureUnit}
+                  isLoading={measureStatsLoading}
+                />
+                <MonthlyBarCard
+                  data={measureStats?.monthlyBars ?? []}
+                  habitColor={measureColor}
+                  logType="value"
+                  unit={measureUnit}
+                  isLoading={measureStatsLoading}
+                />
+              </div>
+            </>
+          )}
+        </div>
       )}
     </div>
   )
