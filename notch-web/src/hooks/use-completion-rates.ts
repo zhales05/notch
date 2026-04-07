@@ -5,10 +5,14 @@ import { createClient } from "@/lib/supabase/client"
 import { formatDateKey } from "@/lib/date-utils"
 
 /**
- * Fetches 30-day completion rates for a set of habit IDs.
+ * Fetches completion rates for a set of habits.
+ * Uses min(30, days since habit created) as the denominator.
  * Returns a Map<habitId, percentage (0–100)>.
  */
-export function useCompletionRates(habitIds: string[]) {
+export function useCompletionRates(
+  habits: { id: string; created_at: string }[]
+) {
+  const habitIds = useMemo(() => habits.map((h) => h.id), [habits])
   const [rates, setRates] = useState<Map<string, number>>(new Map())
   const [isLoading, setIsLoading] = useState(false)
 
@@ -50,9 +54,17 @@ export function useCompletionRates(habitIds: string[]) {
       }
 
       const result = new Map<string, number>()
-      for (const id of habitIds) {
-        const days = dayCounts.get(id)?.size ?? 0
-        result.set(id, Math.round((days / 30) * 100))
+      for (const habit of habits) {
+        const days = dayCounts.get(habit.id)?.size ?? 0
+        const daysSinceCreated = Math.max(
+          1,
+          Math.ceil(
+            (today.getTime() - new Date(habit.created_at).getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) + 1
+        )
+        const denominator = Math.min(30, daysSinceCreated)
+        result.set(habit.id, Math.round((days / denominator) * 100))
       }
 
       setRates(result)

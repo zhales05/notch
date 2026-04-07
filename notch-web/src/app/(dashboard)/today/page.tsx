@@ -35,11 +35,11 @@ export default function TodayPage() {
     totalCount
   )
 
-  const habitIds = useMemo(
-    () => habitsWithLogs.map((h) => h.id),
+  const habitsForRates = useMemo(
+    () => habitsWithLogs.map((h) => ({ id: h.id, created_at: h.created_at })),
     [habitsWithLogs]
   )
-  const { rates: completionRates } = useCompletionRates(habitIds)
+  const { rates: completionRates } = useCompletionRates(habitsForRates)
 
   // Measures
   const { measures, isLoading: measuresLoading } = useMeasures()
