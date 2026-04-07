@@ -16,6 +16,16 @@ export interface CategoryProgress {
   total: number
 }
 
+function habitCompletion(h: HabitWithLog): number {
+  if (h.log === null) return 0
+  if (h.log_type === "boolean" || h.daily_target == null) return 1
+  const current = h.log.value ?? 0
+  if (h.target_direction === "at_most") {
+    return current <= h.daily_target ? 1 : 0
+  }
+  return Math.min(1, current / h.daily_target)
+}
+
 export function useTodayHabits(date: string) {
   const { habits, isLoading: habitsLoading } = useHabits()
   const { logs, isLoading: logsLoading, error, upsertLog, deleteLog } = useLogs(date)
@@ -122,7 +132,7 @@ export function useTodayHabits(date: string) {
   }, [filteredHabits, logs])
 
   const completedCount = useMemo(
-    () => habitsWithLogs.filter((h) => h.log !== null).length,
+    () => habitsWithLogs.reduce((sum, h) => sum + habitCompletion(h), 0),
     [habitsWithLogs]
   )
 
@@ -144,7 +154,7 @@ export function useTodayHabits(date: string) {
       categoryId,
       categoryTitle: cat?.title ?? "Uncategorized",
       categoryColor: cat?.color ?? "#6b7280",
-      completed: catHabits.filter((h) => h.log !== null).length,
+      completed: catHabits.reduce((sum, h) => sum + habitCompletion(h), 0),
       total: catHabits.length,
     }))
   }, [habitsWithLogs])

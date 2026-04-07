@@ -17,7 +17,7 @@ export function CategoryProgress({ data }: CategoryProgressProps) {
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium">{cat.categoryTitle}</span>
               <span className="text-muted-foreground">
-                {cat.completed}/{cat.total}
+                {Math.round(pct)}%
               </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/30">
