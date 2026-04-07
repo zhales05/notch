@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip"
 import { parseDateKey } from "@/lib/date-utils"
 import type { HeatmapDay, DateRange } from "@/lib/types/analytics"
-import type { LogType } from "@/lib/types/habits"
+import type { LogType, TargetDirection } from "@/lib/types/habits"
 
 interface HeatmapCardProps {
   data: HeatmapDay[]
@@ -20,12 +20,16 @@ interface HeatmapCardProps {
   logType?: LogType
   unit?: string
   dateRange?: DateRange
+  dailyTarget?: number | null
+  targetDirection?: TargetDirection
 }
 
-const CELL_SIZE = 12
-const CELL_GAP = 3
-const DAY_LABEL_WIDTH = 28
+const DAY_LABEL_WIDTH = 32
 const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", "Sun"]
+const MIN_CELL_SIZE = 10
+const MAX_CELL_SIZE = 14
+const CELL_GAP = 3
+const CELL_RADIUS = 2
 
 export function HeatmapCard({
   data,
@@ -33,6 +37,8 @@ export function HeatmapCard({
   isLoading,
   logType,
   unit,
+  dailyTarget,
+  targetDirection = "at_least",
 }: HeatmapCardProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -46,24 +52,28 @@ export function HeatmapCard({
     return () => observer.disconnect()
   }, [])
 
-  const isValue = logType === "value"
+  const isScale = logType === "value" || logType === "time"
 
-  // Compute max value for gradient coloring
+  // Compute max value for gradient coloring (only used for scale types)
   const maxValue = useMemo(() => {
-    if (!isValue) return 1
+    if (!isScale) return 1
     let max = 0
     for (const d of data) {
       if (d.value !== null && d.value > max) max = d.value
     }
     return max || 1
-  }, [data, isValue])
+  }, [data, isScale])
 
-  // Calculate how many columns fit
-  const maxColumns = useMemo(() => {
-    if (containerWidth === 0) return 0
-    return Math.floor(
-      (containerWidth - DAY_LABEL_WIDTH) / (CELL_SIZE + CELL_GAP)
-    )
+  // Calculate cell size and column count to fill width
+  const { cellSize, maxColumns } = useMemo(() => {
+    if (containerWidth === 0) return { cellSize: 0, maxColumns: 0 }
+    const gridWidth = containerWidth - DAY_LABEL_WIDTH
+    // Start with max cell size, find how many columns fit
+    for (let size = MAX_CELL_SIZE; size >= MIN_CELL_SIZE; size--) {
+      const cols = Math.floor((gridWidth + CELL_GAP) / (size + CELL_GAP))
+      if (cols >= 1) return { cellSize: size, maxColumns: cols }
+    }
+    return { cellSize: MIN_CELL_SIZE, maxColumns: Math.floor((gridWidth + CELL_GAP) / (MIN_CELL_SIZE + CELL_GAP)) }
   }, [containerWidth])
 
   // Slice data to fit and organize into columns
@@ -116,22 +126,26 @@ export function HeatmapCard({
   // Cell color logic
   const getCellStyle = (day: HeatmapDay) => {
     if (!day.completed) {
-      return {
-        backgroundColor: `color-mix(in srgb, var(--color-muted) 50%, transparent)`,
-        opacity: 0.3,
-      }
+      return { backgroundColor: "var(--color-muted)" }
     }
-    if (isValue && day.value !== null) {
-      const intensity = 0.2 + 0.8 * (day.value / maxValue)
+    // Scale types: intensity gradient based on value
+    if (isScale && day.value !== null) {
+      let intensity: number
+      if (targetDirection === "at_most" && dailyTarget) {
+        // "At most" — lower is better. At/under target = full, over = dimmer
+        const ratio = day.value / dailyTarget
+        intensity = ratio <= 1 ? 1 : Math.max(0.2, 1 - (ratio - 1))
+      } else {
+        // "At least" — higher is better (default GitHub style)
+        intensity = 0.3 + 0.7 * (day.value / maxValue)
+      }
       return {
         backgroundColor: habitColor,
         opacity: intensity,
       }
     }
-    return {
-      backgroundColor: habitColor,
-      opacity: 1,
-    }
+    // Binary: simple on/off
+    return { backgroundColor: habitColor }
   }
 
   if (isLoading) {
@@ -166,37 +180,74 @@ export function HeatmapCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">Activity</CardTitle>
-        {/* Legend */}
+        {/* Legend — gradient for scale types, simple for binary */}
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <div
-              className="size-2.5 rounded-sm"
-              style={{
-                backgroundColor: `color-mix(in srgb, var(--color-muted) 50%, transparent)`,
-                opacity: 0.3,
-              }}
-            />
-            <span>None</span>
-          </div>
-          {isValue && (
-            <div className="flex items-center gap-1">
-              <div
-                className="size-2.5 rounded-sm"
-                style={{ backgroundColor: habitColor, opacity: 0.4 }}
-              />
-              <span>Partial</span>
-            </div>
+          {isScale ? (
+            <>
+              <span>Less</span>
+              <div className="flex items-center gap-1">
+                <div
+                  className="size-2.5"
+                  style={{
+                    backgroundColor: "var(--color-muted)",
+                    borderRadius: CELL_RADIUS,
+                  }}
+                />
+                <div
+                  className="size-2.5"
+                  style={{
+                    backgroundColor: habitColor,
+                    opacity: 0.3,
+                    borderRadius: CELL_RADIUS,
+                  }}
+                />
+                <div
+                  className="size-2.5"
+                  style={{
+                    backgroundColor: habitColor,
+                    opacity: 0.6,
+                    borderRadius: CELL_RADIUS,
+                  }}
+                />
+                <div
+                  className="size-2.5"
+                  style={{
+                    backgroundColor: habitColor,
+                    opacity: 1,
+                    borderRadius: CELL_RADIUS,
+                  }}
+                />
+              </div>
+              <span>More</span>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-1">
+                <div
+                  className="size-2.5"
+                  style={{
+                    backgroundColor: "var(--color-muted)",
+                    borderRadius: CELL_RADIUS,
+                  }}
+                />
+                <span>None</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div
+                  className="size-2.5"
+                  style={{
+                    backgroundColor: habitColor,
+                    borderRadius: CELL_RADIUS,
+                  }}
+                />
+                <span>Done</span>
+              </div>
+            </>
           )}
-          <div className="flex items-center gap-1">
-            <div
-              className="size-2.5 rounded-sm"
-              style={{ backgroundColor: habitColor, opacity: 1 }}
-            />
-            <span>Done</span>
-          </div>
         </div>
       </CardHeader>
-      <CardContent ref={containerRef}>
+      <CardContent>
+        <div ref={containerRef} className="min-h-[1px]" />
         {containerWidth > 0 && columns.length > 0 && (
           <>
             {/* Month labels */}
@@ -209,7 +260,7 @@ export function HeatmapCard({
                   <div
                     key={colIdx}
                     className="text-[10px] text-muted-foreground"
-                    style={{ width: CELL_SIZE + CELL_GAP }}
+                    style={{ width: cellSize + CELL_GAP }}
                   >
                     {monthLabel?.label ?? ""}
                   </div>
@@ -228,7 +279,7 @@ export function HeatmapCard({
                   <div
                     key={i}
                     className="flex items-center text-[10px] text-muted-foreground"
-                    style={{ height: CELL_SIZE }}
+                    style={{ height: cellSize }}
                   >
                     {label}
                   </div>
@@ -249,10 +300,10 @@ export function HeatmapCard({
                           return (
                             <div
                               key={rowIdx}
-                              className="rounded-sm"
                               style={{
-                                width: CELL_SIZE,
-                                height: CELL_SIZE,
+                                width: cellSize,
+                                height: cellSize,
+                                borderRadius: CELL_RADIUS,
                               }}
                             />
                           )
@@ -266,7 +317,7 @@ export function HeatmapCard({
                         })
 
                         const tooltipValue = day.completed
-                          ? isValue && day.value !== null
+                          ? isScale && day.value !== null
                             ? `${day.value} ${unit}`
                             : "Completed"
                           : "Not logged"
@@ -274,10 +325,12 @@ export function HeatmapCard({
                         return (
                           <Tooltip key={day.date}>
                             <TooltipTrigger
-                              className="rounded-sm transition-colors"
                               style={{
-                                width: CELL_SIZE,
-                                height: CELL_SIZE,
+                                width: cellSize,
+                                height: cellSize,
+                                borderRadius: CELL_RADIUS,
+                                outline: "1px solid rgba(27, 31, 35, 0.06)",
+                                outlineOffset: -1,
                                 ...getCellStyle(day),
                               }}
                             />

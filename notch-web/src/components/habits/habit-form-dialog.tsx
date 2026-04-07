@@ -21,6 +21,7 @@ import type {
   LogType,
   FrequencyType,
   FrequencyConfig,
+  TargetDirection,
 } from "@/lib/types/habits"
 import type { GoalWithCategory } from "@/lib/types/goals"
 
@@ -53,6 +54,7 @@ export function HabitFormDialog({
   const [xPerPeriodPeriod, setXPerPeriodPeriod] = useState<"week" | "month">("week")
   const [everyNWeeks, setEveryNWeeks] = useState(2)
   const [dailyTarget, setDailyTarget] = useState("")
+  const [targetDirection, setTargetDirection] = useState<TargetDirection>("at_least")
   const [unit, setUnit] = useState("")
   const [color, setColor] = useState("#6366f1")
   const [icon, setIcon] = useState("check")
@@ -77,6 +79,7 @@ export function HabitFormDialog({
         } else {
           setDailyTarget(habit.daily_target?.toString() ?? "")
         }
+        setTargetDirection(habit.target_direction ?? "at_least")
         setColor(habit.color)
         setIcon(habit.icon)
         setSelectedGoalIds(existingGoalIds)
@@ -116,6 +119,7 @@ export function HabitFormDialog({
         setEveryNWeeks(2)
         setUnit("")
         setDailyTarget("")
+        setTargetDirection("at_least")
         setColor("#6366f1")
         setIcon("check")
         setSelectedGoalIds([])
@@ -180,6 +184,7 @@ export function HabitFormDialog({
         frequency_config: frequencyConfig,
         unit: unit.trim(),
         daily_target: parsedDailyTarget,
+        target_direction: targetDirection,
         color,
         icon,
         goal_ids: selectedGoalIds,
@@ -314,6 +319,28 @@ export function HabitFormDialog({
                   value={dailyTarget}
                   onChange={(e) => setDailyTarget(e.target.value)}
                 />
+              )}
+              {dailyTarget && logType === "value" && (
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={targetDirection === "at_least" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setTargetDirection("at_least")}
+                  >
+                    At least
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={targetDirection === "at_most" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setTargetDirection("at_most")}
+                  >
+                    At most
+                  </Button>
+                </div>
               )}
             </div>
           )}

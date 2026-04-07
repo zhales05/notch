@@ -1,6 +1,7 @@
 import type { Category } from "./categories"
 
 export type LogType = "boolean" | "value" | "time"
+export type TargetDirection = "at_least" | "at_most"
 export type FrequencyType =
   | "daily"
   | "weekly"
@@ -32,6 +33,7 @@ export interface Habit {
   color: string
   icon: string
   daily_target: number | null
+  target_direction: TargetDirection
   sort_order: number
   archived_at: string | null
   created_at: string
@@ -51,6 +53,7 @@ export interface HabitFormData {
   frequency_config: FrequencyConfig
   unit: string
   daily_target: number | null
+  target_direction: TargetDirection
   color: string
   icon: string
   goal_ids: string[]

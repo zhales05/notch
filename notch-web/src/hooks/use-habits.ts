@@ -73,6 +73,7 @@ export function useHabits(showArchived = false) {
           frequency_config: formData.frequency_config,
           unit: formData.log_type === "value" ? formData.unit || null : null,
           daily_target: formData.log_type !== "boolean" ? formData.daily_target : null,
+          target_direction: formData.target_direction,
           color: formData.color,
           icon: formData.icon,
           sort_order: habits.length,
@@ -119,6 +120,7 @@ export function useHabits(showArchived = false) {
       if (formData.log_type === "boolean") {
         updateData.unit = null
         updateData.daily_target = null
+        updateData.target_direction = "at_least"
       }
 
       const { data, error: updateError } = await supabase

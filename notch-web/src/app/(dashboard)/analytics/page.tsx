@@ -194,6 +194,8 @@ export default function AnalyticsPage() {
                 logType={selectedHabit?.log_type}
                 unit={habitUnit}
                 dateRange={effectiveDateRange}
+                dailyTarget={selectedHabit?.daily_target}
+                targetDirection={selectedHabit?.target_direction}
                 isLoading={statsLoading}
               />
 

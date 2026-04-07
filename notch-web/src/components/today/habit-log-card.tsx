@@ -41,7 +41,7 @@ export function HabitLogCard({ habit, completionRate, onToggle, onValueChange }:
           <p className="truncate text-xs text-muted-foreground">
             {habit.category.title}
             {habit.log_type === "value" && habit.unit && habit.daily_target != null && (
-              <> &middot; target: {habit.daily_target} {habit.unit}</>
+              <> &middot; {habit.target_direction === "at_most" ? "≤" : "≥"} {habit.daily_target} {habit.unit}</>
             )}
             {habit.log_type === "time" && habit.daily_target != null && (
               <> &middot; by {String(Math.floor(habit.daily_target / 60)).padStart(2, "0")}:{String(habit.daily_target % 60).padStart(2, "0")}</>
@@ -76,6 +76,7 @@ export function HabitLogCard({ habit, completionRate, onToggle, onValueChange }:
           value={habit.log?.value ?? null}
           unit={habit.unit}
           dailyTarget={habit.daily_target}
+          targetDirection={habit.target_direction}
           onSave={onValueChange}
         />
       )}
@@ -111,11 +112,13 @@ function ValueInput({
   value,
   unit,
   dailyTarget,
+  targetDirection = "at_least",
   onSave,
 }: {
   value: number | null
   unit: string | null
   dailyTarget: number | null
+  targetDirection?: "at_least" | "at_most"
   onSave: (value: number) => void
 }) {
   const [localValue, setLocalValue] = useState(value?.toString() ?? "")
@@ -130,7 +133,15 @@ function ValueInput({
   }
 
   const current = value ?? 0
-  const pct = dailyTarget ? Math.min(100, Math.round((current / dailyTarget) * 100)) : null
+  let pct: number | null = null
+  if (dailyTarget) {
+    if (targetDirection === "at_most") {
+      // At most: 100% when at or under target, decreases as you go over
+      pct = current <= dailyTarget ? 100 : Math.max(0, Math.round((1 - (current - dailyTarget) / dailyTarget) * 100))
+    } else {
+      pct = Math.min(100, Math.round((current / dailyTarget) * 100))
+    }
+  }
 
   return (
     <div className="flex shrink-0 items-center gap-1.5">
