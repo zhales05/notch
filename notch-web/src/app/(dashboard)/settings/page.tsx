@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useProfile } from "@/hooks/use-profile"
 import { SignOutButton } from "@/components/auth/sign-out-button"
+import { updatePassword } from "@/lib/auth/actions"
 
 const FREE_LIMITS = [
   { feature: "Habits", free: "4", premium: "Unlimited" },
@@ -25,6 +26,11 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [isUpgrading, setIsUpgrading] = useState(false)
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
 
   const currentName = displayName ?? profile?.display_name ?? ""
   const hasChanges = displayName !== null && displayName !== (profile?.display_name ?? "")
@@ -39,6 +45,27 @@ export default function SettingsPage() {
       setSaveSuccess(true)
       setDisplayName(null)
       setTimeout(() => setSaveSuccess(false), 2000)
+    }
+  }
+
+  async function handlePasswordUpdate() {
+    setPasswordError(null)
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match.")
+      return
+    }
+    setPasswordSaving(true)
+    const formData = new FormData()
+    formData.set("password", newPassword)
+    const result = await updatePassword(formData)
+    setPasswordSaving(false)
+    if (result.error) {
+      setPasswordError(result.error)
+    } else {
+      setPasswordSuccess(true)
+      setNewPassword("")
+      setConfirmPassword("")
+      setTimeout(() => setPasswordSuccess(false), 2000)
     }
   }
 
@@ -111,6 +138,54 @@ export default function SettingsPage() {
               className="text-muted-foreground"
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Password section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Password</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="newPassword">New password</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Min 6 characters"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter password"
+            />
+          </div>
+          {passwordError && (
+            <p className="text-sm text-destructive">{passwordError}</p>
+          )}
+          <Button
+            className="w-fit"
+            onClick={handlePasswordUpdate}
+            disabled={passwordSaving || !newPassword || !confirmPassword}
+          >
+            {passwordSuccess ? (
+              <>
+                <Check className="size-4" />
+                Updated
+              </>
+            ) : passwordSaving ? (
+              "Updating..."
+            ) : (
+              "Update password"
+            )}
+          </Button>
         </CardContent>
       </Card>
 
