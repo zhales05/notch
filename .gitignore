@@ -4,3 +4,5 @@ node_modules/
 .gitignore
 .mcp.json
 *.tsbuildinfo
+.next/
+next-env.d.ts
