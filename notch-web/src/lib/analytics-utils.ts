@@ -15,11 +15,11 @@ import type {
 
 /**
  * Returns the start date key for a given range.
- * For "all", uses habitCreatedAt or falls back to 365 days ago.
+ * For "all", uses habitStartDate or falls back to 365 days ago.
  */
 export function getDateRangeStart(
   range: DateRange,
-  habitCreatedAt?: string
+  habitStartDate?: string
 ): string {
   const today = new Date()
   switch (range) {
@@ -32,8 +32,8 @@ export function getDateRangeStart(
         new Date(today.getFullYear(), today.getMonth(), today.getDate() - 89)
       )
     case "all":
-      return habitCreatedAt
-        ? habitCreatedAt.slice(0, 10)
+      return habitStartDate
+        ? habitStartDate.slice(0, 10)
         : formatDateKey(
             new Date(
               today.getFullYear(),

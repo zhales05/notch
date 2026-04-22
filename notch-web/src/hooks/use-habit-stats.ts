@@ -23,7 +23,7 @@ interface RawLog {
 export function useHabitStats(
   habitId: string | null,
   dateRange: DateRange,
-  habitCreatedAt?: string
+  habitStartDate?: string
 ) {
   const supabase = useMemo(() => createClient(), [])
   const [logs, setLogs] = useState<RawLog[]>([])
@@ -35,21 +35,22 @@ export function useHabitStats(
 
   // For "all" range, expand heatmap up to 365 days
   const heatmapDays = useMemo(() => {
-    if (dateRange === "all" && habitCreatedAt) {
-      const created = parseDateKey(habitCreatedAt.slice(0, 10))
+    if (dateRange === "all" && habitStartDate) {
+      const created = parseDateKey(habitStartDate.slice(0, 10))
       const diffMs = today.getTime() - created.getTime()
       const daysSinceCreation = Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1
-      return Math.min(daysSinceCreation, 365)
+      // Clamp to [1, 365] — start dates in the future can be negative.
+      return Math.max(1, Math.min(daysSinceCreation, 365))
     }
     return 91
-  }, [dateRange, habitCreatedAt, today])
+  }, [dateRange, habitStartDate, today])
 
   // Fetch window: max(heatmapDays, range) so heatmap always has data
   const fetchStart = useMemo(() => {
-    const rangeStart = getDateRangeStart(dateRange, habitCreatedAt)
+    const rangeStart = getDateRangeStart(dateRange, habitStartDate)
     const heatmapStart = getLastNDays(heatmapDays, today)[0]
     return rangeStart < heatmapStart ? rangeStart : heatmapStart
-  }, [dateRange, habitCreatedAt, today, heatmapDays])
+  }, [dateRange, habitStartDate, today, heatmapDays])
 
   const fetchLogs = useCallback(async () => {
     if (!habitId) {
@@ -101,7 +102,7 @@ export function useHabitStats(
     const completionRate30d = Math.round((logsIn30 / 30) * 100)
 
     // Total logs in the selected range
-    const rangeStart = getDateRangeStart(dateRange, habitCreatedAt)
+    const rangeStart = getDateRangeStart(dateRange, habitStartDate)
     const totalLogs = sortedDates.filter((d) => d >= rangeStart).length
 
     // Daily average for value-type habits
@@ -155,7 +156,7 @@ export function useHabitStats(
       weeklyTrend,
       monthlyBars,
     }
-  }, [logs, habitId, dateRange, habitCreatedAt, today, heatmapDays])
+  }, [logs, habitId, dateRange, habitStartDate, today, heatmapDays])
 
   return { stats, isLoading, error }
 }

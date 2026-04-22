@@ -36,14 +36,14 @@ export function useTodayHabits(date: string) {
 
   const supabase = useMemo(() => createClient(), [])
 
-  // Compute due results for all active habits
+  // Compute due results for all active habits that have started by `date`
   const dueResults = useMemo(() => {
     const selectedDate = new Date(date + "T00:00:00")
     const map = new Map<string, ReturnType<typeof isHabitDueOnDate>>()
     for (const h of habits) {
-      if (!h.archived_at) {
-        map.set(h.id, isHabitDueOnDate(h, selectedDate))
-      }
+      if (h.archived_at) continue
+      if (date < h.start_date) continue
+      map.set(h.id, isHabitDueOnDate(h, selectedDate))
     }
     return map
   }, [habits, date])
@@ -104,6 +104,7 @@ export function useTodayHabits(date: string) {
   const filteredHabits = useMemo(() => {
     return habits.filter((h) => {
       if (h.archived_at) return false
+      if (date < h.start_date) return false
 
       const result = dueResults.get(h.id)
       if (!result) return false
@@ -121,7 +122,7 @@ export function useTodayHabits(date: string) {
 
       return true
     })
-  }, [habits, logs, dueResults, periodLogCounts])
+  }, [habits, date, logs, dueResults, periodLogCounts])
 
   // Merge habits with their log for the selected date
   const habitsWithLogs: HabitWithLog[] = useMemo(() => {

@@ -76,6 +76,7 @@ export function useHabits(showArchived = false) {
           target_direction: formData.target_direction,
           color: formData.color,
           icon: formData.icon,
+          start_date: formData.start_date,
           sort_order: habits.length,
         })
         .select("*, category:categories(id, title, color, icon)")
