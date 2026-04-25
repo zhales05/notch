@@ -58,6 +58,7 @@ export function HabitFormDialog({
   const [unit, setUnit] = useState("")
   const [color, setColor] = useState("#6366f1")
   const [icon, setIcon] = useState("check")
+  const [startDate, setStartDate] = useState("")
   const [selectedGoalIds, setSelectedGoalIds] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,6 +83,7 @@ export function HabitFormDialog({
         setTargetDirection(habit.target_direction ?? "at_least")
         setColor(habit.color)
         setIcon(habit.icon)
+        setStartDate(habit.start_date)
         setSelectedGoalIds(existingGoalIds)
 
         // Normalize legacy weekly/monthly into x_per_period for the form
@@ -122,6 +124,10 @@ export function HabitFormDialog({
         setTargetDirection("at_least")
         setColor("#6366f1")
         setIcon("check")
+        const now = new Date()
+        setStartDate(
+          `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+        )
         setSelectedGoalIds([])
       }
       setError(null)
@@ -139,6 +145,11 @@ export function HabitFormDialog({
 
     if (frequency === "specific_days" && specificDays.length === 0) {
       setError("Select at least one day")
+      return
+    }
+
+    if (!startDate) {
+      setError("Start date is required")
       return
     }
 
@@ -187,6 +198,7 @@ export function HabitFormDialog({
         target_direction: targetDirection,
         color,
         icon,
+        start_date: startDate,
         goal_ids: selectedGoalIds,
       })
       onOpenChange(false)
@@ -437,6 +449,20 @@ export function HabitFormDialog({
                 <span className="text-sm text-muted-foreground">weeks</span>
               </div>
             )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="habit-start-date">Start date</Label>
+            <Input
+              id="habit-start-date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              The habit only counts from this day forward. Pick a future day to
+              schedule it.
+            </p>
           </div>
 
           <div className="grid gap-2">

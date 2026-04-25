@@ -35,6 +35,7 @@ export interface Habit {
   daily_target: number | null
   target_direction: TargetDirection
   sort_order: number
+  start_date: string
   archived_at: string | null
   created_at: string
   updated_at: string
@@ -56,5 +57,6 @@ export interface HabitFormData {
   target_direction: TargetDirection
   color: string
   icon: string
+  start_date: string
   goal_ids: string[]
 }

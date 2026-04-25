@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
   const { stats, isLoading: statsLoading } = useHabitStats(
     effectiveHabitId,
     effectiveDateRange,
-    selectedHabit?.created_at
+    selectedHabit?.start_date
   )
 
   const { categoryStats, isLoading: categoryLoading } =

@@ -6,11 +6,11 @@ import { formatDateKey } from "@/lib/date-utils"
 
 /**
  * Fetches completion rates for a set of habits.
- * Uses min(30, days since habit created) as the denominator.
+ * Uses min(30, days since habit started) as the denominator.
  * Returns a Map<habitId, percentage (0–100)>.
  */
 export function useCompletionRates(
-  habits: { id: string; created_at: string }[]
+  habits: { id: string; start_date: string }[]
 ) {
   const habitIds = useMemo(() => habits.map((h) => h.id), [habits])
   const [rates, setRates] = useState<Map<string, number>>(new Map())
@@ -54,16 +54,20 @@ export function useCompletionRates(
       }
 
       const result = new Map<string, number>()
+      const todayKey = formatDateKey(today)
       for (const habit of habits) {
         const days = dayCounts.get(habit.id)?.size ?? 0
-        const daysSinceCreated = Math.max(
+        // If the habit hasn't started yet, there are no eligible days.
+        if (habit.start_date > todayKey) {
+          result.set(habit.id, 0)
+          continue
+        }
+        const startMs = new Date(habit.start_date + "T00:00:00").getTime()
+        const daysSinceStart = Math.max(
           1,
-          Math.ceil(
-            (today.getTime() - new Date(habit.created_at).getTime()) /
-              (1000 * 60 * 60 * 24)
-          ) + 1
+          Math.floor((today.getTime() - startMs) / (1000 * 60 * 60 * 24)) + 1
         )
-        const denominator = Math.min(30, daysSinceCreated)
+        const denominator = Math.min(30, daysSinceStart)
         result.set(habit.id, Math.round((days / denominator) * 100))
       }
 
